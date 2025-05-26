@@ -25,4 +25,14 @@ export interface EmendaParlamentarParams {
   ano?: number
   codigoFuncao?: string
   codigoSubfuncao?: string
-} 
+}
+
+export interface EmendaDocumento {
+  id: number
+  data: string
+  fase: string
+  codigoDocumento: string
+  codigoDocumentoResumido: string
+  especieTipo: string
+  tipoEmenda: string
+}

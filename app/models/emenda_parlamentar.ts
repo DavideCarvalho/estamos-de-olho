@@ -1,8 +1,9 @@
 import type { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import EmendaDocumento from '#models/emenda_documento'
 
 export default class EmendaParlamentar extends BaseModel {
-
   static table = 'emendas_parlamentares'
 
   @column({ isPrimary: true })
@@ -58,4 +59,7 @@ export default class EmendaParlamentar extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @hasMany(() => EmendaDocumento)
+  declare documentos: HasMany<typeof EmendaDocumento>
 }

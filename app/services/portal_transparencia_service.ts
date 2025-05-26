@@ -1,6 +1,10 @@
 import env from '#start/env'
 import axios from 'axios'
-import type { EmendaParlamentar, EmendaParlamentarParams } from '#types/portal_transparencia'
+import type {
+  EmendaParlamentar,
+  EmendaParlamentarParams,
+  EmendaDocumento,
+} from '#types/portal_transparencia'
 
 export class PortalTransparenciaService {
   private readonly baseUrl = 'https://api.portaldatransparencia.gov.br/api-de-dados'
@@ -204,6 +208,14 @@ export class PortalTransparenciaService {
   // Emendas Parlamentares
   async getEmendas(params: EmendaParlamentarParams): Promise<EmendaParlamentar[]> {
     const response = await this.client.get('/emendas', { params })
+    return response.data
+  }
+
+  // Documentos de Emendas Parlamentares
+  async getEmendaDocumentos(codigo: string, pagina = 1): Promise<EmendaDocumento[]> {
+    const response = await this.client.get(`/emendas/documentos/${codigo}`, {
+      params: { pagina },
+    })
     return response.data
   }
 }
