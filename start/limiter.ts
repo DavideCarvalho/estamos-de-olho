@@ -16,6 +16,6 @@ export const throttle = limiter.define('global', () => {
 })
 
 export const throttlePortalTransparencia = limiter.use({
-  requests: 400,
+  requests: 380,
   duration: '1 minute',
 })
