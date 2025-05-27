@@ -8,6 +8,7 @@ import { inject } from '@adonisjs/core/container'
 import { Job } from '@rlanz/bull-queue'
 import { DateTime } from 'luxon'
 import queue from '@rlanz/bull-queue/services/main'
+import logger from '@adonisjs/core/services/logger'
 
 interface GetDocumentosEmendaByEmendaParlamentarJobPayload {
   emendaParlamentarId: number
@@ -32,35 +33,59 @@ export default class GetDocumentosEmendaByEmendaParlamentarJob extends Job {
    */
   async handle(payload: GetDocumentosEmendaByEmendaParlamentarJobPayload) {
     const { emendaParlamentarId } = payload
-    const executed = await this.portalTransparenciaLimiterService.limiter.attempt(
-      'portal_transparencia',
-      async () => {
-        const emendaParlamentar = await EmendaParlamentar.find(emendaParlamentarId)
-        if (!emendaParlamentar) {
-          return
-        }
-        const documentos = await this.portalTransparenciaService.getEmendaDocumentos(
-          emendaParlamentar.codigoEmenda
+    try {
+      const emendaParlamentar = await EmendaParlamentar.find(emendaParlamentarId)
+      if (!emendaParlamentar) {
+        logger.info(
+          `[GetDocumentosEmendaByEmendaParlamentarJob] Emenda parlamentar não encontrada ${emendaParlamentarId}`
         )
-
-        if (!documentos || !documentos.length) {
-          console.log('Nenhum documento encontrado para a emenda parlamentar', emendaParlamentarId)
-          return true
-        }
-
-        // Convert dates from DD/MM/YYYY to YYYY-MM-DD
-        const documentosFormatados = documentos.map((doc) => ({
-          ...doc,
-          data: DateTime.fromFormat(doc.data, 'dd/MM/yyyy'),
-          emendaParlamentarId,
-        }))
-
-        await EmendaDocumento.query().where('emendaParlamentarId', emendaParlamentarId).delete()
-        await EmendaDocumento.createMany(documentosFormatados)
+        return
       }
-    )
-    if (!executed) {
-      queue.dispatch(GetDocumentosEmendaByEmendaParlamentarJob, { emendaParlamentarId })
+      const emendaDocuments = await EmendaDocumento.findManyBy(
+        'emendaParlamentarId',
+        emendaParlamentarId
+      )
+      for (const doc of emendaDocuments) {
+        await doc.delete()
+      }
+
+      const documentos = await this.portalTransparenciaService.getEmendaDocumentos(
+        emendaParlamentar.codigoEmenda
+      )
+
+      if (!documentos || !documentos.length) {
+        logger.info(
+          `[GetDocumentosEmendaByEmendaParlamentarJob] Nenhum documento encontrado para a emenda parlamentar ${emendaParlamentarId}`
+        )
+        return
+      }
+
+      // Convert dates from DD/MM/YYYY to YYYY-MM-DD
+      const documentosFormatados = await Promise.all(
+        documentos.map((doc) => {
+          const emendaDocumento = new EmendaDocumento()
+          return emendaDocumento.fill({
+            data: DateTime.fromFormat(doc.data, 'dd/MM/yyyy'),
+            emendaParlamentarId,
+            id: doc.id === -1 ? undefined : doc.id,
+            fase: doc.fase,
+            codigoDocumento: doc.codigoDocumento,
+            codigoDocumentoResumido: doc.codigoDocumentoResumido,
+            especieTipo: doc.especieTipo,
+            tipoEmenda: doc.tipoEmenda,
+          })
+        })
+      )
+
+      EmendaDocumento.createMany(documentosFormatados)
+      logger.info(
+        `[GetDocumentosEmendaByEmendaParlamentarJob] Documentos salvos para a emenda parlamentar ${emendaParlamentarId}`
+      )
+    } catch (error) {
+      logger.info(
+        `[GetDocumentosEmendaByEmendaParlamentarJob] Erro ao salvar documentos para a emenda parlamentar ${emendaParlamentarId}`
+      )
+      logger.info(`[GetDocumentosEmendaByEmendaParlamentarJob] Erro: ${JSON.stringify(error)}`)
     }
   }
 

@@ -37,22 +37,22 @@ export default class EmendaParlamentar extends BaseModel {
   declare subfuncao: string
 
   @column()
-  declare valorEmpenhado: string
+  declare valorEmpenhado: number | null
 
   @column()
-  declare valorLiquidado: string
+  declare valorLiquidado: number | null
 
   @column()
-  declare valorPago: string
+  declare valorPago: number | null
 
   @column()
-  declare valorRestoInscrito: string
+  declare valorRestoInscrito: number | null
 
   @column()
-  declare valorRestoCancelado: string
+  declare valorRestoCancelado: number | null
 
   @column()
-  declare valorRestoPago: string
+  declare valorRestoPago: number | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

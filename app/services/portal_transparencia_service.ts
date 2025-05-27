@@ -1,221 +1,123 @@
-import env from '#start/env'
-import axios from 'axios'
 import type {
   EmendaParlamentar,
   EmendaParlamentarParams,
   EmendaDocumento,
 } from '#types/portal_transparencia'
+// biome-ignore lint/style/useImportType: <explanation>
+import { PortalTransparenciaFallbackIntegration } from '#integration/portal_transparencia_fallback_integration'
+// biome-ignore lint/style/useImportType: <explanation>
+import { PortalTransparenciaIntegration } from '#integration/portal_transparencia_integration'
+import logger from '@adonisjs/core/services/logger'
+import { inject } from '@adonisjs/core'
+import type { AxiosError } from 'axios'
 
+@inject()
 export class PortalTransparenciaService {
-  private readonly baseUrl = 'https://api.portaldatransparencia.gov.br/api-de-dados'
-  private readonly apiKey = env.get('PORTAL_TRANSPARENCIA_API_KEY')
-  private readonly client = axios.create({
-    baseURL: this.baseUrl,
-    headers: {
-      'chave-api-dados': this.apiKey,
-      'Content-Type': 'application/json',
-    },
-  })
+  constructor(
+    private readonly portalTransparenciaFallbackIntegration: PortalTransparenciaFallbackIntegration,
+    private readonly portalTransparenciaIntegration: PortalTransparenciaIntegration
+  ) {}
 
-  private readonly headers = {
-    'chave-api-dados': this.apiKey,
-    'Content-Type': 'application/json',
-  }
-
-  // Beneficiários
-  async getBeneficiarios(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await this.client.get('/beneficiarios', { params })
-    return response.data
-  }
-
-  // Convênios
-  async getConvenios(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await this.client.get('/convenios', { params })
-    return response.data
-  }
-
-  // Contratos
-  async getContratos(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await axios.get(`${this.baseUrl}/contratos`, {
-      headers: this.headers,
-      params,
-    })
-    return response.data
-  }
-
-  // Empenhos
-  async getEmpenhos(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await axios.get(`${this.baseUrl}/empenhos`, {
-      headers: this.headers,
-      params,
-    })
-    return response.data
-  }
-
-  // Licitações
-  async getLicitacoes(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await axios.get(`${this.baseUrl}/licitacoes`, {
-      headers: this.headers,
-      params,
-    })
-    return response.data
-  }
-
-  // Pagamentos
-  async getPagamentos(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await axios.get(`${this.baseUrl}/pagamentos`, {
-      headers: this.headers,
-      params,
-    })
-    return response.data
-  }
-
-  // Transferências
-  async getTransferencias(params: {
-    pagina?: number
-    dataInicio?: string
-    dataFim?: string
-    codigoIBGE?: string
-    codigoOrgao?: string
-    codigoPrograma?: string
-    codigoAcao?: string
-    codigoFuncao?: string
-    codigoSubFuncao?: string
-    codigoFavorecido?: string
-    nomeFavorecido?: string
-    codigoElemento?: string
-    codigoGrupo?: string
-    codigoModalidade?: string
-    codigoUnidade?: string
-    codigoMunicipio?: string
-    codigoUF?: string
-  }) {
-    const response = await axios.get(`${this.baseUrl}/transferencias`, {
-      headers: this.headers,
-      params,
-    })
-    return response.data
-  }
-
-  // Emendas Parlamentares
   async getEmendas(params: EmendaParlamentarParams): Promise<EmendaParlamentar[]> {
-    const response = await this.client.get('/emendas', { params })
-    return response.data
+    try {
+      logger.info('[getEmendas] Tentando usar integração oficial')
+      const response = await this.portalTransparenciaIntegration.getEmendas(params)
+      logger.info(
+        `[getEmendas] Usando integração oficial para o ano: ${params.ano} na página: ${params.pagina}`
+      )
+      if (!Array.isArray(response.data)) {
+        logger.info(`[getEmendas] Resposta não é um array: ${JSON.stringify(response.data)}`)
+        logger.info('[getEmendas] Soltando erro pra ir pro fallback')
+        throw new Error()
+      }
+      return response.data
+    } catch (error) {
+      try {
+        logger.info('[getEmendas] Erro na integração oficial, tentando usar fallback')
+        const response = await this.portalTransparenciaFallbackIntegration.getEmendas(params)
+        if (!Array.isArray(response.data?.data)) {
+          logger.info(
+            `[getEmendas] Fallback: Resposta não é um array: ${JSON.stringify(response.data)}`
+          )
+          logger.info('[getEmendas] Fallback: Soltando erro e não retornando nada')
+          throw new Error()
+        }
+        logger.info(
+          `[getEmendas] Usando fallback para o ano: ${params.ano} na página: ${params.pagina}`
+        )
+        return response.data.data.map((emenda) => ({
+          codigoEmenda: emenda.codigoEmenda,
+          ano: emenda.ano,
+          tipoEmenda: emenda.tipoEmenda,
+          autor: emenda.autor,
+          nomeAutor: emenda.autor,
+          numeroEmenda: emenda.numeroEmenda,
+          localidadeDoGasto: emenda.localidadeDoGasto,
+          funcao: emenda.funcao,
+          subfuncao: emenda.subfuncao,
+          valorEmpenhado: emenda.valorEmpenhado,
+          valorLiquidado: emenda.valorLiquidado,
+          valorPago: emenda.valorPago,
+          valorRestoInscrito: emenda.valorRestoInscrito,
+          valorRestoCancelado: emenda.valorRestoCancelado,
+          valorRestoPago: emenda.valorRestoPago,
+        }))
+      } catch (error2) {
+        logger.info('[getEmendas] Erro no fallback, soltando erro')
+        logger.info(`[getEmendas] Erro: ${JSON.stringify((error2 as AxiosError).response?.data)}`)
+        throw new Error()
+      }
+    }
   }
 
-  // Documentos de Emendas Parlamentares
   async getEmendaDocumentos(codigo: string, pagina = 1): Promise<EmendaDocumento[]> {
-    const response = await this.client.get(`/emendas/documentos/${codigo}`, {
-      params: { pagina },
-    })
-    return response.data
+    try {
+      logger.info('[getEmendaDocumentos] Tentando usar integração oficial')
+      const response = await this.portalTransparenciaIntegration.getEmendaDocumentos(codigo, pagina)
+      logger.info(
+        `[getEmendaDocumentos] Usando integração oficial para o código: ${codigo} na página: ${pagina}`
+      )
+      if (!Array.isArray(response.data)) {
+        logger.info(
+          `[getEmendaDocumentos] Resposta não é um array: ${JSON.stringify(response.data)}`
+        )
+        logger.info('[getEmendaDocumentos] Soltando erro pra ir pro fallback')
+        throw new Error()
+      }
+      return response.data
+    } catch (error) {
+      try {
+        logger.info('[getEmendaDocumentos] Erro na integração oficial, tentando usar fallback')
+        const response = await this.portalTransparenciaFallbackIntegration.getEmendaDocumentos(
+          codigo,
+          pagina
+        )
+        if (!Array.isArray(response.data?.data)) {
+          logger.info(
+            `[getEmendaDocumentos] Fallback: Resposta não é um array: ${JSON.stringify(response.data)}`
+          )
+          logger.info('[getEmendaDocumentos] Fallback: Soltando erro e não retornando nada')
+          throw new Error()
+        }
+        logger.info(
+          `[getEmendaDocumentos] Usando fallback para o código: ${codigo} na página: ${pagina}`
+        )
+        return response.data.data.map((doc) => ({
+          data: doc.data,
+          fase: doc.fase,
+          codigoDocumento: doc.codigoDocumento,
+          codigoDocumentoResumido: doc.codigoDocumentoResumido,
+          favorecido: doc.favorecido,
+          valor: doc.valor,
+          id: -1,
+          especieTipo: '',
+          tipoEmenda: '',
+        }))
+      } catch (error2) {
+        logger.info('[getEmendaDocumentos] Erro no fallback, soltando erro')
+        logger.info(`[getEmendaDocumentos] Erro: ${JSON.stringify(error2)}`)
+        throw new Error()
+      }
+    }
   }
 }

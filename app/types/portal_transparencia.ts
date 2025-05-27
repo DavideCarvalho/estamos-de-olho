@@ -17,14 +17,8 @@ export interface EmendaParlamentar {
 }
 
 export interface EmendaParlamentarParams {
-  pagina?: number
-  codigoEmenda?: string
-  numeroEmenda?: string
-  nomeAutor?: string
-  tipoEmenda?: string
-  ano?: number
-  codigoFuncao?: string
-  codigoSubfuncao?: string
+  pagina: number
+  ano: number
 }
 
 export interface EmendaDocumento {
