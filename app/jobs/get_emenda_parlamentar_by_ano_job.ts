@@ -52,38 +52,6 @@ export default class GetEmendaParlamentarByAnoJob extends Job {
       )
       .delete()
     const formattedEmendas = emendas.map((emenda) => {
-      console.log('valorEmpenhado', emenda.valorEmpenhado)
-      console.log('valorLiquidado', emenda.valorLiquidado)
-      console.log('valorPago', emenda.valorPago)
-      console.log('valorRestoInscrito', emenda.valorRestoInscrito)
-      console.log('valorRestoCancelado', emenda.valorRestoCancelado)
-      console.log('valorRestoPago', emenda.valorRestoPago)
-      console.log('--------------------------------')
-      console.log('--------------------------------')
-      console.log('--------------------------------')
-      console.log(
-        'valorEmpenhado salvando',
-        this.convertBrazilianNumberToInteger(emenda.valorEmpenhado)
-      )
-      console.log(
-        'valorLiquidado salvando',
-        this.convertBrazilianNumberToInteger(emenda.valorLiquidado)
-      )
-      console.log('valorPago salvando', this.convertBrazilianNumberToInteger(emenda.valorPago))
-      console.log(
-        'valorRestoInscrito salvando',
-        this.convertBrazilianNumberToInteger(emenda.valorRestoInscrito)
-      )
-      console.log(
-        'valorRestoCancelado salvando',
-        this.convertBrazilianNumberToInteger(emenda.valorRestoCancelado)
-      )
-      console.log(
-        'valorRestoPago salvando',
-        this.convertBrazilianNumberToInteger(emenda.valorRestoPago)
-      )
-      console.log('--------------------------------')
-      console.log('--------------------------------')
       return new EmendaParlamentar().fill({
         ...emenda,
         valorEmpenhado: this.convertBrazilianNumberToInteger(emenda.valorEmpenhado),
