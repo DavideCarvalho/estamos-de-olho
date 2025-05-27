@@ -1,11 +1,12 @@
 import EmendaDocumento from '#models/emenda_documento'
 import EmendaParlamentar from '#models/emenda_parlamentar'
 // biome-ignore lint/style/useImportType: <explanation>
+import { PortalTransparenciaLimiterService } from '#services/portal_transparencia_limiter_service'
+// biome-ignore lint/style/useImportType: <explanation>
 import { PortalTransparenciaService } from '#services/portal_transparencia_service'
 import { inject } from '@adonisjs/core/container'
 import { Job } from '@rlanz/bull-queue'
 import { DateTime } from 'luxon'
-import { throttlePortalTransparencia } from '#start/limiter'
 import queue from '@rlanz/bull-queue/services/main'
 
 interface GetDocumentosEmendaByEmendaParlamentarJobPayload {
@@ -14,7 +15,10 @@ interface GetDocumentosEmendaByEmendaParlamentarJobPayload {
 
 @inject()
 export default class GetDocumentosEmendaByEmendaParlamentarJob extends Job {
-  constructor(private readonly portalTransparenciaService: PortalTransparenciaService) {
+  constructor(
+    private readonly portalTransparenciaService: PortalTransparenciaService,
+    private readonly portalTransparenciaLimiterService: PortalTransparenciaLimiterService
+  ) {
     super()
   }
 
@@ -28,8 +32,8 @@ export default class GetDocumentosEmendaByEmendaParlamentarJob extends Job {
    */
   async handle(payload: GetDocumentosEmendaByEmendaParlamentarJobPayload) {
     const { emendaParlamentarId } = payload
-    const executed = await throttlePortalTransparencia.attempt(
-      `get_documentos_emenda_by_emenda_parlamentar_job_${emendaParlamentarId}`,
+    const executed = await this.portalTransparenciaLimiterService.limiter.attempt(
+      'portal_transparencia',
       async () => {
         const emendaParlamentar = await EmendaParlamentar.find(emendaParlamentarId)
         if (!emendaParlamentar) {
@@ -41,7 +45,7 @@ export default class GetDocumentosEmendaByEmendaParlamentarJob extends Job {
 
         if (!documentos || !documentos.length) {
           console.log('Nenhum documento encontrado para a emenda parlamentar', emendaParlamentarId)
-          return
+          return true
         }
 
         // Convert dates from DD/MM/YYYY to YYYY-MM-DD
@@ -53,7 +57,6 @@ export default class GetDocumentosEmendaByEmendaParlamentarJob extends Job {
 
         await EmendaDocumento.query().where('emendaParlamentarId', emendaParlamentarId).delete()
         await EmendaDocumento.createMany(documentosFormatados)
-        return true
       }
     )
     if (!executed) {

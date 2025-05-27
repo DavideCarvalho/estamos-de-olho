@@ -5,7 +5,8 @@ import { PortalTransparenciaService } from '#services/portal_transparencia_servi
 import { inject } from '@adonisjs/core/container'
 import { Job } from '@rlanz/bull-queue'
 import queue from '@rlanz/bull-queue/services/main'
-import { throttlePortalTransparencia } from '#start/limiter'
+// biome-ignore lint/style/useImportType: <explanation>
+import { PortalTransparenciaLimiterService } from '#services/portal_transparencia_limiter_service'
 
 interface GetEmendaParlamentarByAnoJobPayload {
   ano: number
@@ -14,7 +15,10 @@ interface GetEmendaParlamentarByAnoJobPayload {
 
 @inject()
 export default class GetEmendaParlamentarByAnoJob extends Job {
-  constructor(private readonly portalTransparenciaService: PortalTransparenciaService) {
+  constructor(
+    private readonly portalTransparenciaService: PortalTransparenciaService,
+    private readonly portalTransparenciaLimiterService: PortalTransparenciaLimiterService
+  ) {
     super()
   }
 
@@ -28,12 +32,12 @@ export default class GetEmendaParlamentarByAnoJob extends Job {
    */
   async handle(payload: GetEmendaParlamentarByAnoJobPayload) {
     const { ano, pagina = 1 } = payload
-    const executed = await throttlePortalTransparencia.attempt(
-      `get_emenda_parlamentar_by_ano_job_${ano}_${pagina}`,
+    const executed = await this.portalTransparenciaLimiterService.limiter.attempt(
+      'portal_transparencia',
       async () => {
         const emendas = await this.portalTransparenciaService.getEmendas({ ano, pagina })
         if (!emendas.length) {
-          return
+          return true
         }
         await EmendaParlamentar.query()
           .where(

@@ -14,8 +14,3 @@ import limiter from '@adonisjs/limiter/services/main'
 export const throttle = limiter.define('global', () => {
   return limiter.allowRequests(10).every('1 minute')
 })
-
-export const throttlePortalTransparencia = limiter.use({
-  requests: 380,
-  duration: '1 minute',
-})
