@@ -1,13 +1,10 @@
 import EmendaParlamentar from '#models/emenda_parlamentar'
 import GetDocumentosEmendaByEmendaParlamentarJob from '#jobs/get_documentos_emenda_by_emenda_parlamentar_job'
-// biome-ignore lint/style/useImportType: <explanation>
 import { PortalTransparenciaService } from '#services/portal_transparencia_service'
 import { inject } from '@adonisjs/core/container'
 import { Job } from '@rlanz/bull-queue'
 import queue from '@rlanz/bull-queue/services/main'
 import logger from '@adonisjs/core/services/logger'
-// biome-ignore lint/style/useImportType: <explanation>
-import { PortalTransparenciaLimiterService } from '#services/portal_transparencia_limiter_service'
 
 interface GetEmendaParlamentarByAnoJobPayload {
   ano: number
@@ -16,10 +13,7 @@ interface GetEmendaParlamentarByAnoJobPayload {
 
 @inject()
 export default class GetEmendaParlamentarByAnoJob extends Job {
-  constructor(
-    private readonly portalTransparenciaService: PortalTransparenciaService,
-    private readonly portalTransparenciaLimiterService: PortalTransparenciaLimiterService
-  ) {
+  constructor(private readonly portalTransparenciaService: PortalTransparenciaService) {
     super()
   }
 

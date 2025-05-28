@@ -3,9 +3,7 @@ import type {
   EmendaParlamentarParams,
   EmendaDocumento,
 } from '#types/portal_transparencia'
-// biome-ignore lint/style/useImportType: <explanation>
 import { PortalTransparenciaFallbackIntegration } from '#integration/portal_transparencia_fallback_integration'
-// biome-ignore lint/style/useImportType: <explanation>
 import { PortalTransparenciaIntegration } from '#integration/portal_transparencia_integration'
 import logger from '@adonisjs/core/services/logger'
 import { inject } from '@adonisjs/core'

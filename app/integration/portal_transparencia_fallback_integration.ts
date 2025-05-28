@@ -56,7 +56,6 @@ export class PortalTransparenciaFallbackIntegration {
     headers: {
       'Content-Type': 'application/json',
       'User-Agent': 'PostmanRuntime/7.26.8',
-      // biome-ignore lint/complexity/useLiteralKeys: <explanation>
       'Host': 'portaldatransparencia.gov.br',
     },
   })
