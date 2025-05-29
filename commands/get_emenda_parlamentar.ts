@@ -4,9 +4,9 @@ import queue from '@rlanz/bull-queue/services/main'
 import GetEmendaParlamentarByAnoJob from '../app/jobs/get_emenda_parlamentar_by_ano_job.js'
 
 export default class GetEmendaParlamentar extends BaseCommand {
-  static commandName = 'get:emenda-parlamentar'
+  static commandName = 'emenda-parlamentar-etl'
   static description = ''
-  static aliases = ['gep']
+  static aliases = ['etl:ep']
 
   @args.string()
   declare ano: string

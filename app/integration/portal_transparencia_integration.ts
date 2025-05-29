@@ -4,6 +4,7 @@ import type {
   EmendaParlamentar,
   EmendaParlamentarParams,
   EmendaDocumento,
+  DocumentoDetalhes,
 } from '#types/portal_transparencia'
 
 export class PortalTransparenciaIntegration {
@@ -28,6 +29,12 @@ export class PortalTransparenciaIntegration {
     const response = await this.client.get(`/emendas/documentos/${codigo}`, {
       params: { pagina },
     })
+    return response
+  }
+
+  // Detalhes do Documento
+  async getDocumentoDetalhes(codigo: string): Promise<AxiosResponse<DocumentoDetalhes>> {
+    const response = await this.client.get(`/despesas/documentos/${codigo}`)
     return response
   }
 }
