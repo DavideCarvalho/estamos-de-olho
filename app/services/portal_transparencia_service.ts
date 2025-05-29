@@ -2,6 +2,7 @@ import type {
   EmendaParlamentar,
   EmendaParlamentarParams,
   EmendaDocumento,
+  DocumentoDetalhes,
 } from '#types/portal_transparencia'
 import { PortalTransparenciaFallbackIntegration } from '#integration/portal_transparencia_fallback_integration'
 import { PortalTransparenciaIntegration } from '#integration/portal_transparencia_integration'
@@ -114,6 +115,40 @@ export class PortalTransparenciaService {
       } catch (error2) {
         logger.info('[getEmendaDocumentos] Erro no fallback, soltando erro')
         logger.info(`[getEmendaDocumentos] Erro: ${JSON.stringify(error2)}`)
+        throw new Error()
+      }
+    }
+  }
+
+  async getDocumentoDetalhes(codigo: string): Promise<DocumentoDetalhes> {
+    try {
+      logger.info('[getDocumentoDetalhes] Tentando usar integração oficial')
+      const response = await this.portalTransparenciaIntegration.getDocumentoDetalhes(codigo)
+      logger.info(`[getDocumentoDetalhes] Usando integração oficial para o código: ${codigo}`)
+      if (!response.data) {
+        logger.info(
+          `[getDocumentoDetalhes] Resposta inválida: ${JSON.stringify(response.data)}`
+        )
+        logger.info('[getDocumentoDetalhes] Soltando erro pra ir pro fallback')
+        throw new Error()
+      }
+      return response.data
+    } catch (error) {
+      try {
+        logger.info('[getDocumentoDetalhes] Erro na integração oficial, tentando usar fallback')
+        const response = await this.portalTransparenciaFallbackIntegration.getDocumentoDetalhes(codigo)
+        if (!response.data) {
+          logger.info(
+            `[getDocumentoDetalhes] Fallback: Resposta inválida: ${JSON.stringify(response.data)}`
+          )
+          logger.info('[getDocumentoDetalhes] Fallback: Soltando erro e não retornando nada')
+          throw new Error()
+        }
+        logger.info(`[getDocumentoDetalhes] Usando fallback para o código: ${codigo}`)
+        return response.data
+      } catch (error2) {
+        logger.info('[getDocumentoDetalhes] Erro no fallback, soltando erro')
+        logger.info(`[getDocumentoDetalhes] Erro: ${JSON.stringify(error2)}`)
         throw new Error()
       }
     }

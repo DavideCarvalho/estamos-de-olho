@@ -5,6 +5,8 @@ import { inject } from '@adonisjs/core/container'
 import { Job } from '@rlanz/bull-queue'
 import { DateTime } from 'luxon'
 import logger from '@adonisjs/core/services/logger'
+import queue from '@rlanz/bull-queue/services/main'
+import GetEmendaDocumentoFavorecidosJob from '#jobs/get_emenda_documento_favorecidos_job'
 
 interface GetDocumentosEmendaByEmendaParlamentarJobPayload {
   emendaParlamentarId: number
@@ -70,7 +72,12 @@ export default class GetDocumentosEmendaByEmendaParlamentarJob extends Job {
         })
       )
 
-      EmendaDocumento.createMany(documentosFormatados)
+      const docsSaved = await EmendaDocumento.createMany(documentosFormatados)
+      for (const doc of docsSaved) {
+        queue.dispatch(GetEmendaDocumentoFavorecidosJob, {
+          emendaDocumentoId: doc.id,
+        })
+      }
       logger.info(
         `[GetDocumentosEmendaByEmendaParlamentarJob] Documentos salvos para a emenda parlamentar ${emendaParlamentarId}`
       )

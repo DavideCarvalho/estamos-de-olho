@@ -12,11 +12,11 @@ export default class GetEmendaParlamentar extends BaseCommand {
   @args.string()
   declare codigo: string
 
-  static options: CommandOptions = { startApp: true }
+  static options: CommandOptions = { startApp: false }
 
   @inject()
   async run(portalTransparenciaFallbackIntegration: PortalTransparenciaFallbackIntegration) {
     const documento = await portalTransparenciaFallbackIntegration.getDocumentoDetalhes(this.codigo)
-    console.log(documento)
+    console.log(documento.data)
   }
 }
